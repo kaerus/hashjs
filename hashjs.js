@@ -4,22 +4,23 @@
  * Released under the MIT License, feel free to use, share and modify. 
  */
 
-define(function(){
+define(['utils'],function(utils){
 
 
-var Emitter = require('utils').Emitter,
-    POLL_INTERVAL = 250,                                    // only used in setInterval fallback  
+var POLL_INTERVAL = 250,                                    // only used in setInterval fallback  
     MSIE = /*@cc_on!@*/0,                                   // IE specific conditional comment   
     ONHASHCHANGE = window.hasOwnProperty('onhashchange'),   // FF3.6+, IE8+, Chrome 5+, Safari 5+
     LOCAL = (window.location.protocol === 'file:'),         
     PREPEND = '/', SEPARATE = '/', APPEND = '';
 
 
-function Hasher(early_init) {
+function Hasher(init) {
     if(!(this instanceof Hasher)) {
       return new Hasher(Array.prototype.slice.call(arguments));
     } 
-    var self = this;    
+    var self = this;
+
+    utils.Emitter.call(this);    
 
     this.url = '';
     this._hash = null;
@@ -52,7 +53,7 @@ function Hasher(early_init) {
     }
 
     this.get = function(){
-        return this.parse(this._hash);
+        return self.parse(self._hash);
     }
 
     this.changeTo = function(newHash){
@@ -91,7 +92,7 @@ function Hasher(early_init) {
 
     this.arrayToHash = function(/*['p1','p2','pn']*/){
         var paths = Array.prototype.slice.call(arguments),
-            path = paths.join(this.separate);
+            path = paths.join(self.separate);
         path = path || self.prepend + path.replace(/^\#/, '') + self.append;
 
         if(MSIE && LOCAL){
@@ -156,15 +157,13 @@ function Hasher(early_init) {
     }
     
     /* Constructor initialized */ 
-    if(early_init) self.init(early_init);
+    if(init) this.init(init);
 
     /* make singleton */
-    self = function(){
-        return hasher;
-    }  
+    Hasher = this;
 }
 
-Hasher.prototype = new Emitter();
+utils.inherit(Hasher,utils.Emitter);
 
 /* Expose Hasher */
 return Hasher;
