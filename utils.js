@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-define(function (require) {
+define(function () {
 
 function extend() {
   var deep = false, target = {}, i = 0;
