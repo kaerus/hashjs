@@ -6,7 +6,7 @@
 (function (global) {
     "use strict"
 
-    var PREPEND = '/', SEPARATE = '/', APPEND = '';
+    var PREPEND = '', SEPARATE = '/', APPEND = '', POLLINTERVAL = 250;
 
     function addListener(elm, eType, fn){
         if(elm.addEventListener){
@@ -32,16 +32,17 @@
         _a: APPEND,
         _p: PREPEND,
         _s: SEPARATE,
+        _f: POLLINTERVAL,
 
         get: function(path) {
-            if(!path || path === undefined) return Hasher.path;
+            if(!path || path === undefined) path = Hasher.path;
 
             var a = path.indexOf(Hasher._p),
                 b = path.lastIndexOf(Hasher._a);
 
-            if(a === b) a = 0; 
             if(a < 0) a = 0;
-            if(b < 0) b = path.length;   
+            else a+=Hasher._p.length;
+            if(b <= 0) b = path.length;   
 
             return path.substr(a,b);
         },
@@ -53,6 +54,13 @@
             }
         },
         update: function(path){
+
+            if(Object.prototype.toString.call(path) === '[object Array]'){
+                path = Hasher.arrayToPath(path);
+            } else {
+                path = Hasher._p + Array.prototype.join.call(arguments,Hasher._s) + Hasher._a;
+            }    
+
             if(path !== Hasher.path){
                 Hasher.set(path); 
                 window.location.hash = '#'+ encodeURI(path); 
@@ -68,32 +76,36 @@
 
             return h < 0 ? '' : decodeURIComponent(url.substr(h+1,url.length));
         },
-        toArray: function(){
-            return Hasher.path.split(Hasher._s);
+        toArray: function(path){
+            return Hasher.get(path).split(Hasher._s);
         },
-        arrayToHash: function(a){
-            var h = Hasher._p + a.join(Hasher._s) + Hasher._a;
+        arrayToPath: function(array){
+            var h = Hasher._p + array.join(Hasher._s) + Hasher._a;
 
             return h;
         },
-        start: function(args){
-            var p;  
+        start: function(){
+            var i = 0;  
 
             Hasher.path = Hasher.uri();
 
-            if( typeof args === 'object' ) {
-                p = args.poll;
-                Hasher._a = args.append || APPEND;
-                Hasher._p = args.prepend || PREPEND;
-                Hasher._s = args.separate || SEPARATE;
-                Hasher.onStart = args.onStart || Hasher.onStart;
-                Hasher.onChange = args.onChange || Hasher.onChange;
-            }
+            /* configure hash divisors */
+            if(typeof arguments[i] === 'string') Hasher._p = arguments[i++];
+            if(typeof arguments[i] === 'string') Hasher._s = arguments[i++];
+            if(typeof arguments[i] === 'string') Hasher._a = arguments[i++];
+
+            /* event callbacks */
+            if(typeof arguments[i] === 'function') Hasher.onStart = arguments[i++];
+            if(typeof arguments[i] === 'function') Hasher.onChange = arguments[i++];
+
+            /* poll interval in msec (used in fallback mode only) */
+            if(typeof arguments[i] === 'number') Hasher._f = arguments[i++];
+
             if(window.hasOwnProperty('onhashchange')) {
                 addListener(window, 'hashchange', Hasher.event);
             } else {
-                // fallback mode
-                Hasher._timer = setInterval(Hasher.event, p||250);
+                /* fallback mode */
+                Hasher._timer = setInterval(Hasher.event, Hasher._f);
             }
 
             if(Hasher.onStart) Hasher.onStart(Hasher.get());
