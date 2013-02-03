@@ -39,8 +39,9 @@
             var a = path.indexOf(Hasher._p),
                 b = path.lastIndexOf(Hasher._a);
 
+            if(a === b) a = 0; 
             if(a < 0) a = 0;
-            if(b < 0) b = path.length;    
+            if(b < 0) b = path.length;   
 
             return path.substr(a,b);
         },
@@ -57,16 +58,15 @@
                 window.location.hash = '#'+ encodeURI(path); 
             }
         },
-        check: function(event) {
+        event: function(event) {
             var path = Hasher.uri(event.newURL);
-            if(path !== Hasher.path)
-                Hasher.set(path);
+            Hasher.set(path);
         },
         uri: function(url){
             url = url || window.location.href;
             var h = url.indexOf('#');
 
-            return h < 0 ? '' : decodeURIComponent(url.substr(h,url.length));
+            return h < 0 ? '' : decodeURIComponent(url.substr(h+1,url.length));
         },
         toArray: function(){
             return Hasher.path.split(Hasher._s);
@@ -89,20 +89,18 @@
                 Hasher.onStart = args.onStart || Hasher.onStart;
                 Hasher.onChange = args.onChange || Hasher.onChange;
             }
-            
-            // onhashchange: FF3.6+, IE8+, Chrome 5+, Safari 5+
             if(window.hasOwnProperty('onhashchange')) {
-                addListener(window, 'hashchange', Hasher.check);
+                addListener(window, 'hashchange', Hasher.event);
             } else {
                 // fallback mode
-                Hasher._timer = setInterval(Hasher.check, p||250);
+                Hasher._timer = setInterval(Hasher.event, p||250);
             }
 
             if(Hasher.onStart) Hasher.onStart(Hasher.get());
         },
         stop: function() {
             if(window.hasOwnProperty('onhashchange')) {
-                removeListener(window, 'hashchange', Hasher.check);
+                removeListener(window, 'hashchange', Hasher.event);
             } else {
                 clearInterval(Hasher._timer);
                 delete Hasher._timer;

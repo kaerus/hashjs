@@ -7,13 +7,15 @@
 		<button href="#two" id="two">Two</button>
 		<button href="#three" id="three">Three</button>
 	</div>	
+		<a href="#four">Four</a>
+		<a href="#five">Five</a>
+		<a href="#six">Six</a>
 	<script src="./hashjs.js"></script>
 	<script>
-		var hash = Hasher;
 		
-		hash.onChange = change;
-		hash.onStart = start;
-		hash.start();
+		Hasher.onChange = change;
+		Hasher.onStart = start;
+		Hasher.start();
 
 		function change(path,old){
 			console.log("hash changed from %s to",old,path);
@@ -26,7 +28,7 @@
 		document.getElementById('buttons').onclick = click;
 
 		function click(e){
-			hash.update(e.srcElement.id);
+			Hasher.update(e.srcElement.id);
 		}
 
 
