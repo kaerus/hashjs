@@ -17,14 +17,12 @@ Usage
 	</div>	
 	<script src="./hashjs.js"></script>
 	<script>
-		var hash = Hasher;
-		
-		hash.onChange = change;
-		hash.onStart = start;
-		hash.start();
+		/* configure the hash string "#!xxx/yyy:" */
+		/* assign event callbacks & pollinterval. */
+		Hasher.start("!","/",":",start,change,500);
 
 		function change(path,old){
-			console.log("hash changed from %s to",old,path);
+			console.log("hash changed from %s to",old,Hasher.toArray(path));
 		}
 
 		function start(path){
@@ -34,10 +32,8 @@ Usage
 		document.getElementById('buttons').onclick = click;
 
 		function click(e){
-			hash.update(e.srcElement.id);
+			Hasher.update(e.srcElement.id);
 		}
-
-
 	</script>
 </body>
 ```
