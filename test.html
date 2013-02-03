@@ -3,26 +3,20 @@
 	<head><title>Hash test</title></head>
 <body>
 	<div id="buttons">
-		<button href="#one" id="one">One</button>
-		<button href="#two" id="two">Two</button>
-		<button href="#three" id="three">Three</button>
+		<button id="one">One</button>
+		<button id="two">Two</button>
+		<button id="three">Three</button>
 	</div>	
 		<a href="#four">Four</a>
 		<a href="#five">Five</a>
 		<a href="#six">Six</a>
 	<script src="./hashjs.js"></script>
 	<script>
-		
-		Hasher.onChange = change;
-		Hasher.onStart = start;
-		Hasher.start();
+		Hasher.start("!/","/",change,500);
 
 		function change(path,old){
-			console.log("hash changed from %s to",old,path);
-		}
-
-		function start(path){
-			console.log("hash path is", path);
+			if(!old) console.log("hash start path", path.toArray());
+			else console.log("hash changed from %s to",old,path.toArray());
 		}
 		
 		document.getElementById('buttons').onclick = click;

@@ -18,15 +18,12 @@ Usage
 	<script src="./hashjs.js"></script>
 	<script>
 		/* configure the hash string "#!xxx/yyy:" */
-		/* assign event callbacks & pollinterval. */
-		Hasher.start("!","/",":",start,change,500);
+		/* assign onChange handler & pollinterval. */
+		Hasher.start("!","/",":",start,500);
 
 		function change(path,old){
-			console.log("hash changed from %s to",old,Hasher.toArray(path));
-		}
-
-		function start(path){
-			console.log("hash path is", path);
+			if(!old) console.log("hash start",path);
+			else console.log("hash changed from %s to",old,path.toArray);
 		}
 		
 		document.getElementById('buttons').onclick = click;

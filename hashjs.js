@@ -26,43 +26,54 @@
 
     /* singleton */
     var Hasher = {
-        path: null,
-        onStart: null,   
-        onChange: null,
-        _a: APPEND,
-        _p: PREPEND,
-        _s: SEPARATE,
-        _f: POLLINTERVAL,
+        hash: { 
+            path:null,            
+            onChange: null,
+            poll: POLLINTERVAL,
+            _a: APPEND,
+            _p: PREPEND, 
+            _s: SEPARATE, 
+            change: function(path){
+                if(this.path !== path){
+                    var old = this.path;
+                    this.path = path; 
+                    this.onChange(this, this.toString(old));
+                }               
+            },
+            toString: function(path){
+                if(!path || path === undefined) path = this.path;
 
+                var a = path.indexOf(this._p),
+                    b = path.lastIndexOf(this._a);
+
+                if(a < 0) a = 0;
+                else a+=this._p.length;
+                if(b <= 0) b = path.length;   
+
+                return path.substr(a,b);
+            },  
+            toArray: function(path){ 
+                return this.toString(path).split(this._s) 
+            },
+            toPath: function(array){            
+                return this._p + array.join(this._s) + this._a;
+            }
+        },  
         get: function(path) {
-            if(!path || path === undefined) path = Hasher.path;
-
-            var a = path.indexOf(Hasher._p),
-                b = path.lastIndexOf(Hasher._a);
-
-            if(a < 0) a = 0;
-            else a+=Hasher._p.length;
-            if(b <= 0) b = path.length;   
-
-            return path.substr(a,b);
+            return this.hash.toString(path);
         },
         set: function(path){
-            if(Hasher.path !== path){
-                var old = Hasher.path;
-                Hasher.path = path; 
-                Hasher.onChange(Hasher.get(path), Hasher.get(old));
-            }
+            this.hash.change(path);
         },
         update: function(path){
-
             if(Object.prototype.toString.call(path) === '[object Array]'){
-                path = Hasher.arrayToPath(path);
+                path = this.hash.toPath(path);
             } else {
-                path = Hasher._p + Array.prototype.join.call(arguments,Hasher._s) + Hasher._a;
+                path = this.hash._p + Array.prototype.join.call(arguments,this.hash._s) + this.hash._a;
             }    
 
-            if(path !== Hasher.path){
-                Hasher.set(path); 
+            if(path !== this.hash.path){
+                this.hash.change(path); 
                 window.location.hash = '#'+ encodeURI(path); 
             }
         },
@@ -76,46 +87,37 @@
 
             return h < 0 ? '' : decodeURIComponent(url.substr(h+1,url.length));
         },
-        toArray: function(path){
-            return Hasher.get(path).split(Hasher._s);
-        },
-        arrayToPath: function(array){
-            var h = Hasher._p + array.join(Hasher._s) + Hasher._a;
-
-            return h;
-        },
         start: function(){
             var i = 0;  
 
-            Hasher.path = Hasher.uri();
+            this.hash.path = this.uri();
 
             /* configure hash divisors */
-            if(typeof arguments[i] === 'string') Hasher._p = arguments[i++];
-            if(typeof arguments[i] === 'string') Hasher._s = arguments[i++];
-            if(typeof arguments[i] === 'string') Hasher._a = arguments[i++];
+            if(typeof arguments[i] === 'string') this.hash._p = arguments[i++];
+            if(typeof arguments[i] === 'string') this.hash._s = arguments[i++];
+            if(typeof arguments[i] === 'string') this.hash._a = arguments[i++];
 
-            /* event callbacks */
-            if(typeof arguments[i] === 'function') Hasher.onStart = arguments[i++];
-            if(typeof arguments[i] === 'function') Hasher.onChange = arguments[i++];
+            /* register onChange callback */
+            if(typeof arguments[i] === 'function') this.hash.onChange = arguments[i++];
 
             /* poll interval in msec (used in fallback mode only) */
-            if(typeof arguments[i] === 'number') Hasher._f = arguments[i++];
+            if(typeof arguments[i] === 'number') this.hash.poll = arguments[i++];
 
             if(window.hasOwnProperty('onhashchange')) {
-                addListener(window, 'hashchange', Hasher.event);
+                addListener(window, 'hashchange', this.event);
             } else {
                 /* fallback mode */
-                Hasher._timer = setInterval(Hasher.event, Hasher._f);
+                this._timer = setInterval(this.event, this.hash.poll);
             }
 
-            if(Hasher.onStart) Hasher.onStart(Hasher.get());
+            if(this.hash.onChange) this.hash.onChange(this.hash);
         },
         stop: function() {
             if(window.hasOwnProperty('onhashchange')) {
-                removeListener(window, 'hashchange', Hasher.event);
+                removeListener(window, 'hashchange', this.event);
             } else {
-                clearInterval(Hasher._timer);
-                delete Hasher._timer;
+                clearInterval(this._timer);
+                delete this._timer;
             }
         },
 
