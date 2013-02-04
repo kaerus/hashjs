@@ -66,10 +66,11 @@
             this.hash.change(path);
         },
         update: function(path){
-            if(Object.prototype.toString.call(path) === '[object Array]'){
+
+            if(Array.isArray(path)){
                 path = this.hash.toPath(path);
             } else {
-                path = this.hash._p + Array.prototype.join.call(arguments,this.hash._s) + this.hash._a;
+                path = this.hash._p + [].join.call(arguments,this.hash._s) + this.hash._a;
             }    
 
             if(path !== this.hash.path){
@@ -78,7 +79,7 @@
             }
         },
         event: function(event) {
-            var path = Hasher.uri(event.newURL);
+            var path = Hasher.uri(event ? event.newURL : undefined);
             Hasher.set(path);
         },
         uri: function(url){
