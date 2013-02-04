@@ -53,7 +53,7 @@
                 return path.substr(a,b);
             },  
             toArray: function(path){ 
-                return this.toString(path).split(this._s) 
+                return this.toString(path).split(this._s); 
             },
             toPath: function(array){            
                 return this._p + array.join(this._s) + this._a;
@@ -70,7 +70,7 @@
             if(Array.isArray(path)){
                 path = this.hash.toPath(path);
             } else {
-                path = this.hash._p + [].join.call(arguments,this.hash._s) + this.hash._a;
+                path = this.hash.toPath([].slice.call(arguments));
             }    
 
             if(path !== this.hash.path){
@@ -79,6 +79,7 @@
             }
         },
         event: function(event) {
+            event = event ? event : window.event;
             var path = Hasher.uri(event ? event.newURL : undefined);
             Hasher.set(path);
         },
@@ -114,7 +115,7 @@
             if(this.hash.onChange) this.hash.onChange(this.hash);
         },
         stop: function() {
-            if(window.hasOwnProperty('onhashchange')) {
+            if('onhashchange' in window) {
                 removeListener(window, 'hashchange', this.event);
             } else {
                 clearInterval(this._timer);
