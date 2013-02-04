@@ -21,10 +21,12 @@
 		
 		document.getElementById('buttons').onclick = click;
 
-		function click(e){
-			Hasher.update(e.srcElement.id);
+		function click(event){
+			var target = event.target || event.srcElement;
+			Hasher.update(target.id);
 		}
 
 
 	</script>
 </body>
+</html>

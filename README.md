@@ -22,15 +22,17 @@ Usage
 		Hasher.start("!","/",":",start,500);
 
 		function change(path,old){
-			if(!old) console.log("hash start",path);
-			else console.log("hash changed from %s to",old,path.toArray);
+			if(!old) console.log("hash start path", path.toArray());
+			else console.log("hash changed from %s to",old,path.toArray());
 		}
 		
 		document.getElementById('buttons').onclick = click;
 
-		function click(e){
-			Hasher.update(e.srcElement.id);
+		function click(event){
+			var target = event.target || event.srcElement;
+			Hasher.update(target.id);
 		}
+
 	</script>
 </body>
 ```
