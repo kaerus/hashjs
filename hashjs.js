@@ -104,7 +104,7 @@
             /* poll interval in msec (used in fallback mode only) */
             if(typeof arguments[i] === 'number') this.hash.poll = arguments[i++];
 
-            if(window.hasOwnProperty('onhashchange')) {
+            if('onhashchange' in window) {
                 addListener(window, 'hashchange', this.event);
             } else {
                 /* fallback mode */
