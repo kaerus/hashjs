@@ -2,7 +2,7 @@ hashjs
 ======
 
 window location hash navigator
-
+* Web component found <a href="https://github.com/kaerus-component">here</a> 
 Usage
 -----
 ```
